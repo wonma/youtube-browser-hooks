@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 
 import SearchBar from './SearchBar';
 import VideoList from './VideoList';
@@ -6,24 +6,14 @@ import VideoDetail from './VideoDetail';
 
 import youtube from '../apis/youtube';
 
-class App extends React.Component {
-    state = {
-        videos: [],
-        selectedVideo: null,
-        searchExamples: ['happiness', 'anxiety', 'self-esteem', 'dream']
-    }
+const App = () => {
+    const [videos, setVideos] = useState([]);
+    const [selected, setSelected] = useState(null);
+    const [searchExamples, setSearchExamples] = useState(['happiness', 'anxiety', 'self-esteem', 'dream']);
 
-    componentDidMount() {
-        const randomExample = this.state.searchExamples[Math.floor(Math.random() * this.state.searchExamples.length)];
-        console.log(randomExample);
-        this.onTermSubmit(randomExample);
-    }
-
-    onVideoSelect = (selectedVideo) => {
-        this.setState({ selectedVideo })
-    }
-
-    onTermSubmit = (term) => {
+    //request하고 state 두 개 업데이트 : 1. 첫 로딩 시 & 2. 서치바에서 키워드 submit 되었을 때 
+    //업뎃 할 state: videos, selected
+    const onTermSubmit = (term) => {
         youtube.get('/search', {
             params: {
                 part: 'snippet',
@@ -35,32 +25,35 @@ class App extends React.Component {
             }
         }).then((response) => {
             if (response.data.items.length !== 0) {
-                this.setState({
-                    selectedVideo: response.data.items[0],
-                    videos: response.data.items
-                });
+                setSelected(response.data.items[0]); // videoDetail 위해
+                setVideos(response.data.items); // videoList 위해
             } else {
                 console.log(response);
             }
-    })}
+        })
+    }
 
-    render() {
-        return (
-            <div className="ui container">
-                <SearchBar onTermSubmit={this.onTermSubmit} />
-                <div className="ui grid">
-                    <div className="ui row">
-                        <div className="eleven wide column">
-                            <VideoDetail video={this.state.selectedVideo} />
-                        </div>
-                        <div className="five wide column">
-                            <VideoList className="four wide column" onVideoSelect={this.onVideoSelect} videos={this.state.videos} />
-                        </div>
+    useEffect(()=>{
+        const randomExample = searchExamples[Math.floor(Math.random() * searchExamples.length)];
+        onTermSubmit(randomExample);
+    },[]);
+
+
+    return (
+        <div className="ui container">
+            <SearchBar onTermSubmit={onTermSubmit} />
+            <div className="ui grid">
+                <div className="ui row">
+                    <div className="eleven wide column">
+                        <VideoDetail video={selected} />
+                    </div>
+                    <div className="five wide column">
+                        <VideoList className="four wide column" onVideoSelect={setSelected} videos={videos} />
                     </div>
                 </div>
             </div>
-        );
-    }
+        </div>
+    );
 }
 
 export default App;

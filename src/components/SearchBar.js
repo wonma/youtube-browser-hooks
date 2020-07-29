@@ -1,38 +1,30 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './SearchBar.css';
 
-class SearchBar extends React.Component {
-    state = {
-        input: ''
-    }
+const SearchBar = ({onTermSubmit}) => {
+    const [input, setInput] = useState('');
 
-    onInputChange = (input) => {
-        this.setState({ input });
-    }
-
-    onSubmit = (e) => {
+    const onSubmit = (e) => {
         e.preventDefault();
-        this.props.onTermSubmit(this.state.input);
+        onTermSubmit(input); // App으로부터 받아온 기능으로, 키워드검색 request를 보내게 된다
     }
 
-    render() {
-        return (
-            <div className="search-bar ui segment">
-                <form onSubmit={this.onSubmit} className="ui form">
-                    <div className="field">
-                        <input
-                            value={this.state.input}
-                            onChange={(e) => this.onInputChange(e.target.value)}
-                            placeholder="Type a Subject"
-                            className="search-bar__input"
-                        />
-                        <button className="ui button primary">Submit</button>
-                    </div>
-                    <div className="results"></div>
-                </form>
-            </div>
-        );
-    }
+    return (
+        <div className="search-bar ui segment">
+            <form onSubmit={onSubmit} className="ui form">
+                <div className="field">
+                    <input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Type a Subject"
+                        className="search-bar__input"
+                    />
+                    <button className="ui button primary">Submit</button>
+                </div>
+                <div className="results"></div>
+            </form>
+        </div>
+    );
 }
 
 export default SearchBar;
